@@ -10,7 +10,15 @@ const routes: Routes = [
 	{
 		path: 'home',
 		loadChildren: () => import('./pages/home/home.module').then((m) => m.HomePageModule)
-	}
+	},
+  {
+    path: 'map-view',
+    loadChildren: () => import('./pages/map-view/map-view.module').then( m => m.MapViewPageModule)
+  },
+  {
+    path: 'track-list',
+    loadChildren: () => import('./pages/track-list/track-list.module').then( m => m.TrackListPageModule)
+  }
 ];
 
 @NgModule({

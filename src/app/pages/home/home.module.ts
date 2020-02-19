@@ -7,12 +7,9 @@ import { IonicModule } from '@ionic/angular';
 import { HomePageRoutingModule } from './home-routing.module';
 
 import { HomePage } from './home.page';
-import { ModalMapPageModule } from '../modal-map/modal-map.module';
-import { ModalMapPage } from '../modal-map/modal-map.page';
 
 @NgModule({
-	entryComponents: [ ModalMapPage ],
-	imports: [ CommonModule, FormsModule, IonicModule, HomePageRoutingModule, ModalMapPageModule ],
+	imports: [ CommonModule, FormsModule, IonicModule, HomePageRoutingModule ],
 	declarations: [ HomePage ]
 })
 export class HomePageModule {}

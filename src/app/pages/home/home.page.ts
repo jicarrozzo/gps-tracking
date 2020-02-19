@@ -1,10 +1,16 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Geolocation, Coordinates, Geoposition } from '@ionic-native/geolocation/ngx';
 import { Subscription } from 'rxjs';
-import { Geometry, PointIsInside } from 'src/app/models/geoJSON';
-import { GoogleMap, GoogleMaps, Polygon, LatLng, ILatLng, Poly } from '@ionic-native/google-maps';
-import { Platform, ModalController } from '@ionic/angular';
-import { ModalMapPage } from '../modal-map/modal-map.page';
+import { GoogleMap, ILatLng, Poly } from '@ionic-native/google-maps';
+import { Platform } from '@ionic/angular';
+import { NavigationExtras } from '@angular/router';
+import { NavController } from '@ionic/angular';
+
+export interface PointIsInside {
+	point: Coordinates;
+	polygon: ILatLng[];
+	inside: boolean;
+}
 
 @Component({
 	selector: 'app-home',
@@ -22,7 +28,7 @@ export class HomePage implements OnInit, OnDestroy {
 	state: boolean = true;
 	positions: PointIsInside[] = [];
 
-	constructor(private platform: Platform, private modalController: ModalController, private geolocation: Geolocation) {}
+	constructor(private platform: Platform, private navCtrl: NavController, private geolocation: Geolocation) {}
 
 	async ngOnInit() {
 		this.polyBig = [
@@ -46,44 +52,27 @@ export class HomePage implements OnInit, OnDestroy {
 		await this.platform.ready();
 		await this.load();
 	}
+
 	ngOnDestroy() {
 		if (this.sub != null) this.sub.unsubscribe();
 	}
 
-	async load() {
-		try {
-			this.positions.push({
-				point: {
-					latitude: 55.8155269,
-					longitude: 37.6542869,
-					altitude: null,
-					accuracy: 29.111000061035156,
-					altitudeAccuracy: null,
-					heading: 312.1745300292969,
-					speed: 0.015320675447583199
-				} as Coordinates,
-				inside: true
-			} as PointIsInside);
-			//			Poly.containsLocation(position, GORYOKAKU_POINTS);
-		} catch (error) {
-			console.log(error);
-		}
-	}
+	async load() {}
 
 	activate() {
 		if (this.state) {
 			this.positions = [];
-			// console.log(this.polygon);
-
 			let watch = this.geolocation.watchPosition({ enableHighAccuracy: true });
 
 			this.sub = watch.subscribe(
 				(data: Geoposition) => {
 					let poli = this.getPolygon();
 					const pos: ILatLng = { lat: data.coords.latitude, lng: data.coords.longitude };
-					console.log(data.coords);
-
-					this.positions.push({ point: data.coords, inside: Poly.containsLocation(pos, poli) } as PointIsInside);
+					this.positions.push({
+						point: data.coords,
+						polygon: poli,
+						inside: Poly.containsLocation(pos, poli)
+					} as PointIsInside);
 				},
 				(error) => {
 					console.log(error);
@@ -107,11 +96,13 @@ export class HomePage implements OnInit, OnDestroy {
 	}
 
 	async showmap(p: PointIsInside) {
-		const modal = await this.modalController.create({
-			component: ModalMapPage,
-			componentProps: { point: p, poligon: this.getPolygon() }
-		});
-
-		await modal.present();
+		const coords: ILatLng = { lat: p.point.latitude, lng: p.point.longitude };
+		let navigationExtras: NavigationExtras = {
+			queryParams: {
+				point: JSON.stringify(coords),
+				polygon: JSON.stringify(p.polygon)
+			}
+		};
+		this.navCtrl.navigateForward([ 'map-view' ], navigationExtras);
 	}
 }
