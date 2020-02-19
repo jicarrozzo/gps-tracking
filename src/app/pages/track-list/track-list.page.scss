@@ -1,0 +1,9 @@
+ion-list-header {
+	font-size: 25px;
+}
+
+ion-card {
+	&.selected {
+		border: 1px solid var(--ion-color-success);
+	}
+}

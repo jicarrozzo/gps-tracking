@@ -1,13 +1,14 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Geolocation, Coordinates, Geoposition } from '@ionic-native/geolocation/ngx';
 import { Subscription } from 'rxjs';
-import { GoogleMap, ILatLng, Poly } from '@ionic-native/google-maps';
+import { ILatLng, Poly } from '@ionic-native/google-maps';
 import { Platform } from '@ionic/angular';
 import { NavigationExtras } from '@angular/router';
 import { NavController } from '@ionic/angular';
 
 export interface PointIsInside {
 	point: Coordinates;
+	polygonName: string;
 	polygon: ILatLng[];
 	inside: boolean;
 }
@@ -18,13 +19,11 @@ export interface PointIsInside {
 	styleUrls: [ './home.page.scss' ]
 })
 export class HomePage implements OnInit, OnDestroy {
-	map: GoogleMap;
-
 	sub: Subscription;
 	polygon: string = 'home';
-	polyMarket: ILatLng[]; //Geometry;
-	polyDom: ILatLng[]; //Geometry;
-	polyBig: ILatLng[]; //Geometry;
+	polyMarket: ILatLng[];
+	polyDom: ILatLng[];
+	polyBig: ILatLng[];
 	state: boolean = true;
 	positions: PointIsInside[] = [];
 
@@ -70,6 +69,7 @@ export class HomePage implements OnInit, OnDestroy {
 					const pos: ILatLng = { lat: data.coords.latitude, lng: data.coords.longitude };
 					this.positions.push({
 						point: data.coords,
+						polygonName: this.polygon,
 						polygon: poli,
 						inside: Poly.containsLocation(pos, poli)
 					} as PointIsInside);
@@ -100,7 +100,8 @@ export class HomePage implements OnInit, OnDestroy {
 		let navigationExtras: NavigationExtras = {
 			queryParams: {
 				point: JSON.stringify(coords),
-				polygon: JSON.stringify(p.polygon)
+				polygon: JSON.stringify(p.polygon),
+				returnTo: 'home'
 			}
 		};
 		this.navCtrl.navigateForward([ 'map-view' ], navigationExtras);

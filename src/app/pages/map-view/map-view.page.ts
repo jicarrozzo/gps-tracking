@@ -12,11 +12,13 @@ export class MapViewPage implements OnInit, OnDestroy {
 	map: GoogleMap;
 	point: ILatLng;
 	polygon: ILatLng[];
+	returnTo: string;
 
 	constructor(private platform: Platform, private route: ActivatedRoute, private navCtrl: NavController) {
 		this.route.queryParams.subscribe((params) => {
 			this.point = JSON.parse(params['point']) as ILatLng;
-			this.polygon = JSON.parse(params['polygon']) as ILatLng[];
+			if (params['polygon'] != '') this.polygon = JSON.parse(params['polygon']) as ILatLng[];
+			this.returnTo = params['returnTo'];
 		});
 	}
 
@@ -30,7 +32,7 @@ export class MapViewPage implements OnInit, OnDestroy {
 		await this.platform.ready();
 		await this.load(this.point);
 		await this.setMarker(this.point);
-		await this.setPolygon(this.polygon);
+		if (this.polygon != null) await this.setPolygon(this.polygon);
 	}
 
 	async load(point: ILatLng) {
@@ -68,6 +70,6 @@ export class MapViewPage implements OnInit, OnDestroy {
 	}
 
 	dismiss() {
-		this.navCtrl.navigateBack('home');
+		this.navCtrl.navigateBack(this.returnTo);
 	}
 }
